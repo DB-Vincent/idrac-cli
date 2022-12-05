@@ -42,8 +42,6 @@ struct NetworkAdapterControllerPort {
 
 #[tokio::main]
 pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Settings) -> Result<(), Error> {
-    println!("Retrieving network interface info.. (this may take a while)");
-
     let response = Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(Duration::from_secs(30))
@@ -63,13 +61,16 @@ pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Set
     println!("Manufacturer:  {}", response_json.manufacturer);
     println!("Model:         {}", response_json.model);
     println!("Part number:   {}", response_json.part_number);
-    println!("Serial number: {}", response_json.serial_number);
-
-    println!("\n");
+    println!("Serial number: {}\n", response_json.serial_number);
 
     for controller in response_json.controllers.iter(){
+        println!("Found {} ports on controller:", controller.links.port_count);
+
         for link in &controller.links.network_ports {
-            println!("{}", link.name)
+            let long_name = &link.name;
+            let short_name = long_name.replace(&format!("/redfish/v1/Systems/System.Embedded.1/NetworkAdapters/{}/NetworkPorts/", network_adapter.as_ref().unwrap()), "");
+
+            println!("- {}", short_name)
         }
     }
 

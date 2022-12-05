@@ -20,8 +20,6 @@ struct NetworkAdaptersMember {
 
 #[tokio::main]
 pub async fn list_network_adapters(settings: Settings) -> Result<(), Error> {
-    println!("Retrieving list of network interfaces.. (this may take a while)");
-
     let response = Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(Duration::from_secs(30))
@@ -38,6 +36,13 @@ pub async fn list_network_adapters(settings: Settings) -> Result<(), Error> {
         Err(e) => panic!("Could not introspect the token. Error was:\n {:?}", e),
     };
 
-    println!("Network adapters: {:?}", response_json);
+    println!("Found {} network adapter(s):", response_json.members.len());
+    for network_adapter in response_json.members {
+        let long_name = network_adapter.name;
+        let short_name = long_name.replace("/redfish/v1/Systems/System.Embedded.1/NetworkAdapters/", "");
+
+        println!("- {}", short_name)
+    }
+
     Ok(())
 }

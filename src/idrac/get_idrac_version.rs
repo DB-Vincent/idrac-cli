@@ -11,7 +11,7 @@ struct VersionData {
 }
 
 #[tokio::main]
-pub async fn get_idrac_version(settings: Settings) -> Result<(), Error>{
+pub async fn get_idrac_version(settings: Settings) -> Result<(), Error> {
     let response = Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(Duration::from_secs(30))

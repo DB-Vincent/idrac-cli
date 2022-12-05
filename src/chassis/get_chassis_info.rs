@@ -34,8 +34,6 @@ struct Status {
 
 #[tokio::main]
 pub async fn get_chassis_info(settings: Settings) -> Result<(), Error> {
-    println!("Retrieving chassis info.. (this may take a while)");
-
     let response = Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(Duration::from_secs(30))
@@ -52,6 +50,15 @@ pub async fn get_chassis_info(settings: Settings) -> Result<(), Error> {
         Err(e) => panic!("Could not introspect the token. Error was:\n {:?}", e),
     };
 
-    println!("Chassis info: {:?}", response_json);
+    println!("Indicator LED: {}", response_json.indicator_led);
+    println!("Type:          {} {}", response_json.manufacturer, response_json.model);
+    println!("Part number:   {}", response_json.part_number);
+    println!("Serial number: {}", response_json.serial_number);
+    println!("SKU:           {}", response_json.sku);
+    println!("Power state:   {}", response_json.power_state);
+    if response_json.status.state == "Enabled" {
+        println!("Status:        {}", response_json.status.health);
+    }
+
     Ok(())
 }
