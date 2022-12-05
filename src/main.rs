@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand};
 use config::{Config};
 use serde_derive::Deserialize;
 
@@ -80,20 +80,15 @@ fn main() {
     match &opts.command {
         Commands::Idrac(idrac) => {
             match idrac.command.as_ref().unwrap() {
-                IdracCommands::Version => get_idrac_version(settings).expect("Panic!"),
-                _=> {}
+                IdracCommands::Version => get_idrac_version(settings).expect("Panic!")
             }
         }
         Commands::Chassis(chassis) => {
             match chassis.command.as_ref().unwrap() {
                 ChassisCommands::Info => get_chassis_info(settings).expect("Panic!"),
                 ChassisCommands::ListNetworkAdapters => list_network_adapters(settings).expect("Panic!"),
-                ChassisCommands::GetNetworkAdapter(NetworkAdapter) => get_network_adapter(&NetworkAdapter.name, settings).expect("Panic!"),
-                _=> {}
+                ChassisCommands::GetNetworkAdapter(network_adapter) => get_network_adapter(&network_adapter.name, settings).expect("Panic!")
             }
-        }
-        _ => {
-            println!("Command not found!")
         }
     }
 }
