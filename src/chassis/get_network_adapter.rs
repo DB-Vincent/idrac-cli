@@ -2,34 +2,42 @@ use std::time::Duration;
 use reqwest::{Client, Error};
 use reqwest;
 use serde::{Serialize, Deserialize};
-use crate::{NetworkAdapter, Settings};
+use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdapterInfo {
-    Manufacturer: String,
-    Model: String,
-    PartNumber: String,
-    SerialNumber: String,
-    Controllers: Vec<NetworkAdapterController>
+    #[serde(rename="Manufacturer")]
+    manufacturer: String,
+    #[serde(rename="Model")]
+    model: String,
+    #[serde(rename="PartNumber")]
+    part_number: String,
+    #[serde(rename="SerialNumber")]
+    serial_number: String,
+    #[serde(rename="Controllers")]
+    controllers: Vec<NetworkAdapterController>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdapterController {
-    FirmwarePackageVersion: String,
-    Links:NetworkAdapterControllerLink
+    #[serde(rename="FirmwarePackageVersion")]
+    firmware_package_version: String,
+    #[serde(rename="Links")]
+    links:NetworkAdapterControllerLink
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdapterControllerLink {
     #[serde(rename="NetworkPorts@odata.count")]
-    PortCount: u8,
-    NetworkPorts: Vec<NetworkAdapterControllerPort>
+    port_count: u8,
+    #[serde(rename="NetworkPorts")]
+    network_ports: Vec<NetworkAdapterControllerPort>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdapterControllerPort {
     #[serde(rename="@odata.id")]
-    Name: String
+    name: String
 }
 
 #[tokio::main]
@@ -52,16 +60,16 @@ pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Set
     };
 
     println!("NIC:           {}", network_adapter.as_ref().unwrap());
-    println!("Manufacturer:  {}", response_json.Manufacturer);
-    println!("Model:         {}", response_json.Model);
-    println!("Part number:   {}", response_json.PartNumber);
-    println!("Serial number: {}", response_json.SerialNumber);
+    println!("Manufacturer:  {}", response_json.manufacturer);
+    println!("Model:         {}", response_json.model);
+    println!("Part number:   {}", response_json.part_number);
+    println!("Serial number: {}", response_json.serial_number);
 
     println!("\n");
 
-    for controller in response_json.Controllers.iter(){
-        for link in &controller.Links.NetworkPorts {
-            println!("{}", link.Name)
+    for controller in response_json.controllers.iter(){
+        for link in &controller.links.network_ports {
+            println!("{}", link.name)
         }
     }
 

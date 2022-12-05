@@ -6,14 +6,16 @@ use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdapterList {
-    Name: String,
-    Members: Vec<NetworkAdaptersMember>
+    #[serde(rename="Name")]
+    name: String,
+    #[serde(rename="Members")]
+    members: Vec<NetworkAdaptersMember>
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct NetworkAdaptersMember {
     #[serde(rename="@odata.id")]
-    Name: String
+    name: String
 }
 
 #[tokio::main]

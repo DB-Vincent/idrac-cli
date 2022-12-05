@@ -2,24 +2,34 @@ use std::time::Duration;
 use reqwest::{Client, Error};
 use reqwest;
 use serde::{Serialize, Deserialize};
-use crate::{NetworkAdapter, Settings};
+use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ChassisInfo {
-    IndicatorLED: String,
-    Manufacturer: String,
-    Model: String,
-    PartNumber: String,
-    PowerState: String,
-    SKU: String,
-    SerialNumber: String,
-    Status: Status
+    #[serde(rename="IndicatorLED")]
+    indicator_led: String,
+    #[serde(rename="Manufacturer")]
+    manufacturer: String,
+    #[serde(rename="Model")]
+    model: String,
+    #[serde(rename="PartNumber")]
+    part_number: String,
+    #[serde(rename="PowerState")]
+    power_state: String,
+    #[serde(rename="SKU")]
+    sku: String,
+    #[serde(rename="SerialNumber")]
+    serial_number: String,
+    #[serde(rename="Status")]
+    status: Status
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Status {
-    Health: String,
-    State: String
+    #[serde(rename="Health")]
+    health: String,
+    #[serde(rename="State")]
+    state: String
 }
 
 #[tokio::main]

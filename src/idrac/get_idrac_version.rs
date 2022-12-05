@@ -6,8 +6,8 @@ use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct VersionData {
-    #[warn(non_snake_case)]
-    FirmwareVersion: String,
+    #[serde(rename="FirmwareVersion")]
+    firmware_version: String,
 }
 
 #[tokio::main]
@@ -28,6 +28,6 @@ pub async fn get_idrac_version(settings: Settings) -> Result<(), Error>{
         Err(e) => panic!("Could not introspect the token. Error was:\n {:?}", e),
     };
 
-    println!("iDRAC firmware version: {}", response_json.FirmwareVersion);
+    println!("iDRAC firmware version: {}", response_json.firmware_version);
     Ok(())
 }
