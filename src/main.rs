@@ -10,11 +10,12 @@ use crate::idrac::get_idrac_version::get_idrac_version;
 use crate::chassis::list_network_adapters::list_network_adapters;
 use crate::chassis::get_chassis_info::get_chassis_info;
 use crate::chassis::get_network_adapter::get_network_adapter;
+use crate::chassis::get_network_port::get_network_port;
 
-/// A fictional versioning CLI
+/// A simple command line interface for interacting with iDRAC
 #[derive(Debug, Parser)] // requires `derive` feature
 #[command(name = "idrac-cli")]
-#[command(about = "A simple command line interface for interacting with iDrac", long_about = None)]
+#[command(about = "A simple command line interface for interacting with iDRAC", long_about = None)]
 struct Opts {
     #[command(subcommand)]
     command: Commands,
@@ -49,13 +50,24 @@ struct Chassis {
 enum ChassisCommands {
     Info,
     ListNetworkAdapters,
-    GetNetworkAdapter(NetworkAdapter)
+    GetNetworkAdapter(NetworkAdapter),
+    GetNetworkPort(NetworkPort)
 }
 
 #[derive(Debug, Args)]
 struct NetworkAdapter {
     #[arg(short, long)]
     name: Option<String>,
+    #[arg(short, long)]
+    detailed: bool,
+}
+
+#[derive(Debug, Args)]
+struct NetworkPort {
+    #[arg(short, long)]
+    adapter: Option<String>,
+    #[arg(short, long)]
+    port: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -87,7 +99,14 @@ fn main() {
             match chassis.command.as_ref().unwrap() {
                 ChassisCommands::Info => get_chassis_info(settings).expect("Panic!"),
                 ChassisCommands::ListNetworkAdapters => list_network_adapters(settings).expect("Panic!"),
-                ChassisCommands::GetNetworkAdapter(network_adapter) => get_network_adapter(&network_adapter.name, settings).expect("Panic!")
+                ChassisCommands::GetNetworkAdapter(network_adapter) => {
+                    if network_adapter.detailed {
+                        get_network_adapter(&network_adapter.name, settings, true).expect("Panic!")
+                    } else {
+                        get_network_adapter(&network_adapter.name, settings, false).expect("Panic!")
+                    }
+                },
+                ChassisCommands::GetNetworkPort(network_port) => get_network_port(network_port.adapter.as_ref().unwrap(), network_port.port.as_ref().unwrap(), &settings)
             }
         }
     }
