@@ -13,6 +13,7 @@ use crate::chassis::get_chassis_info::get_chassis_info;
 use crate::chassis::get_network_adapter::get_network_adapter;
 use crate::chassis::get_network_port::get_network_port;
 use crate::chassis::get_storage_controller::get_storage_controller;
+use crate::chassis::get_storage_disk::get_storage_disk;
 use crate::chassis::get_storage_volume::get_storage_volume;
 use crate::chassis::list_storage_options::list_storage_controllers;
 use crate::chassis::list_storage_volumes::list_storage_volumes;
@@ -60,7 +61,8 @@ enum ChassisCommands {
     ListStorageControllers,
     GetStorageController(StorageController),
     ListStorageVolumes(StorageVolumes),
-    GetStorageVolume(StorageVolume)
+    GetStorageVolume(StorageVolume),
+    GetStorageDisk(StorageDisk)
 }
 
 #[derive(Debug, Args)]
@@ -94,9 +96,14 @@ struct StorageVolumes {
 #[derive(Debug, Args)]
 struct StorageVolume {
     #[arg(short, long)]
-    volume: Option<String>,
+    name: Option<String>,
 }
 
+#[derive(Debug, Args)]
+struct StorageDisk {
+    #[arg(short, long)]
+    name: Option<String>,
+}
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -138,8 +145,8 @@ fn main() {
                 ChassisCommands::ListStorageControllers => list_storage_controllers(settings).expect("Panic!"),
                 ChassisCommands::GetStorageController(storage_controller) => get_storage_controller(&storage_controller.name, settings).expect("Panic!"),
                 ChassisCommands::ListStorageVolumes(storage_volume) => list_storage_volumes(&storage_volume.controller, settings).expect("Panic!"),
-                ChassisCommands::GetStorageVolume(storage_volume) => get_storage_volume(&storage_volume.volume, settings).expect("Panic!"),
-
+                ChassisCommands::GetStorageVolume(storage_volume) => get_storage_volume(&storage_volume.name, settings).expect("Panic!"),
+                ChassisCommands::GetStorageDisk(storage_disk) => get_storage_disk(&storage_disk.name, settings).expect("Panic!"),
             }
         }
     }

@@ -6,3 +6,4 @@ pub mod list_storage_options;
 pub mod get_storage_controller;
 pub mod list_storage_volumes;
 pub mod get_storage_volume;
+pub mod get_storage_disk;
