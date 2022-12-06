@@ -2,6 +2,8 @@ use std::time::Duration;
 use reqwest::{Client, Error};
 use reqwest;
 use serde::{Serialize, Deserialize};
+
+use crate::chassis::get_network_port::{get_network_port, NetworkAdapterList};
 use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -41,14 +43,14 @@ struct NetworkAdapterControllerPort {
 }
 
 #[tokio::main]
-pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Settings) -> Result<(), Error> {
+pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Settings, detailed: bool) -> Result<(), Error> {
     let response = Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(Duration::from_secs(30))
         .build()
         .unwrap()
         .get(format!("https://{}/redfish/v1/Systems/System.Embedded.1/NetworkAdapters/{}", settings.host.to_owned(), network_adapter.as_ref().unwrap()))
-        .basic_auth(settings.user, Some(settings.password))
+        .basic_auth(&settings.user, Some(&settings.password))
         .send()
         .await
         .unwrap();
@@ -63,6 +65,8 @@ pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Set
     println!("Part number:   {}", response_json.part_number);
     println!("Serial number: {}\n", response_json.serial_number);
 
+    let mut port_list: Vec<String> = Vec::new();
+
     for controller in response_json.controllers.iter(){
         println!("Found {} ports on controller:", controller.links.port_count);
 
@@ -70,7 +74,35 @@ pub async fn get_network_adapter(network_adapter: &Option<String>, settings: Set
             let long_name = &link.name;
             let short_name = long_name.replace(&format!("/redfish/v1/Systems/System.Embedded.1/NetworkAdapters/{}/NetworkPorts/", network_adapter.as_ref().unwrap()), "");
 
-            println!("- {}", short_name)
+            port_list.push(short_name);
+        }
+    }
+
+    if detailed {
+        for port in port_list {
+            println!("- {}", port);
+
+            let response = Client::builder()
+                .danger_accept_invalid_certs(true)
+                .timeout(Duration::from_secs(30))
+                .build()
+                .unwrap()
+                .get(format!("https://{}/redfish/v1/Systems/System.Embedded.1/NetworkAdapters/{}/NetworkPorts/{}", settings.host.to_owned(), network_adapter.as_ref().unwrap(), port))
+                .basic_auth(&settings.user, Some(&settings.password))
+                .send()
+                .await
+                .unwrap();
+
+            let response_json: NetworkAdapterList = match response.json().await {
+                Ok(r) => r,
+                Err(e) => panic!("Could not introspect the token. Error was:\n {:?}", e),
+            };
+            println!("{:?}", response_json)
+
+        }
+    } else {
+        for port in port_list {
+            println!("- {}", port);
         }
     }
 
