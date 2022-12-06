@@ -4,6 +4,7 @@ use serde_derive::Deserialize;
 
 mod idrac;
 mod chassis;
+mod lib;
 
 use crate::idrac::get_idrac_version::get_idrac_version;
 
@@ -11,6 +12,10 @@ use crate::chassis::list_network_adapters::list_network_adapters;
 use crate::chassis::get_chassis_info::get_chassis_info;
 use crate::chassis::get_network_adapter::get_network_adapter;
 use crate::chassis::get_network_port::get_network_port;
+use crate::chassis::get_storage_controller::get_storage_controller;
+use crate::chassis::get_storage_volume::get_storage_volume;
+use crate::chassis::list_storage_options::list_storage_controllers;
+use crate::chassis::list_storage_volumes::list_storage_volumes;
 
 /// A simple command line interface for interacting with iDRAC
 #[derive(Debug, Parser)] // requires `derive` feature
@@ -51,7 +56,11 @@ enum ChassisCommands {
     Info,
     ListNetworkAdapters,
     GetNetworkAdapter(NetworkAdapter),
-    GetNetworkPort(NetworkPort)
+    GetNetworkPort(NetworkPort),
+    ListStorageControllers,
+    GetStorageController(StorageController),
+    ListStorageVolumes(StorageVolumes),
+    GetStorageVolume(StorageVolume)
 }
 
 #[derive(Debug, Args)]
@@ -69,6 +78,25 @@ struct NetworkPort {
     #[arg(short, long)]
     port: Option<String>,
 }
+
+#[derive(Debug, Args)]
+struct StorageController {
+    #[arg(short, long)]
+    name: Option<String>,
+}
+
+#[derive(Debug, Args)]
+struct StorageVolumes {
+    #[arg(short, long)]
+    controller: Option<String>,
+}
+
+#[derive(Debug, Args)]
+struct StorageVolume {
+    #[arg(short, long)]
+    volume: Option<String>,
+}
+
 
 #[derive(Debug, Deserialize)]
 pub struct Settings {
@@ -106,7 +134,12 @@ fn main() {
                         get_network_adapter(&network_adapter.name, settings, false).expect("Panic!")
                     }
                 },
-                ChassisCommands::GetNetworkPort(network_port) => get_network_port(network_port.adapter.as_ref().unwrap(), network_port.port.as_ref().unwrap(), &settings)
+                ChassisCommands::GetNetworkPort(network_port) => get_network_port(network_port.adapter.as_ref().unwrap(), network_port.port.as_ref().unwrap(), &settings),
+                ChassisCommands::ListStorageControllers => list_storage_controllers(settings).expect("Panic!"),
+                ChassisCommands::GetStorageController(storage_controller) => get_storage_controller(&storage_controller.name, settings).expect("Panic!"),
+                ChassisCommands::ListStorageVolumes(storage_volume) => list_storage_volumes(&storage_volume.controller, settings).expect("Panic!"),
+                ChassisCommands::GetStorageVolume(storage_volume) => get_storage_volume(&storage_volume.volume, settings).expect("Panic!"),
+
             }
         }
     }
