@@ -3,7 +3,7 @@ use reqwest::{Client, Error};
 use reqwest;
 use serde::{Serialize, Deserialize};
 
-use crate::chassis::get_network_port::{get_network_port, NetworkAdapterList};
+use crate::chassis::get_network_port::NetworkAdapterList;
 use crate::Settings;
 
 #[derive(Debug, Serialize, Deserialize)]
